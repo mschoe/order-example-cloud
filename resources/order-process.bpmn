@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1ku27aw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.11.1-new-properties-panel" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.1.0">
+  <bpmn:process id="order-process" name="Order Process" isExecutable="true">
+    <bpmn:extensionElements>
+      <zeebe:userTaskForm id="userTaskForm_3vvo9es">{   "schemaVersion": 2,   "components": [     {       "values": [         {           "label": "Apple",           "value": "apple"         },         {           "label": "Banana",           "value": "banana"         },         {           "label": "Strawberry",           "value": "strawberry"         }       ],       "label": "Select Fruit",       "type": "select",       "id": "Field_0x6d9x5",       "key": "item",       "validate": {         "required": true       }     },     {       "label": "Quantity",       "type": "number",       "id": "Field_01t8tit",       "key": "quantity",       "validate": {         "required": true,         "min": 1,         "max": 1500       }     }   ],   "type": "default",   "executionPlatform": "Camunda Cloud",   "executionPlatformVersion": "1.2",   "id": "select-items" }</zeebe:userTaskForm>
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent_1" name="create order">
+      <bpmn:extensionElements />
+      <bpmn:outgoing>Flow_1xanfdh</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1xanfdh" sourceRef="StartEvent_1" targetRef="Activity_0faqaq6" />
+    <bpmn:sequenceFlow id="Flow_0tvdp7y" sourceRef="Activity_03utgry" targetRef="Event_0o86qb0" />
+    <bpmn:endEvent id="Event_05yczop" name="order fulfilled">
+      <bpmn:incoming>Flow_0vl3sba</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0l9ybvs" sourceRef="Event_0o86qb0" targetRef="Gateway_0l8u3gv" />
+    <bpmn:sendTask id="Activity_03utgry" name="Request Payment">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="request-payment" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1octspd</bpmn:incoming>
+      <bpmn:outgoing>Flow_0tvdp7y</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:intermediateCatchEvent id="Event_0o86qb0" name="payment confirmed">
+      <bpmn:incoming>Flow_0tvdp7y</bpmn:incoming>
+      <bpmn:outgoing>Flow_0l9ybvs</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_04p4r91" messageRef="Message_2sdslqn" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_0vl3sba" sourceRef="Activity_1nozqw7" targetRef="Event_05yczop" />
+    <bpmn:serviceTask id="Activity_1nozqw7" name="Ship Order">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="ship-order" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_18v3ost</bpmn:incoming>
+      <bpmn:outgoing>Flow_0vl3sba</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1mdxj5l" sourceRef="Activity_0faqaq6" targetRef="Activity_1cr7j7z" />
+    <bpmn:sequenceFlow id="Flow_1octspd" sourceRef="Activity_1mhmh48" targetRef="Activity_03utgry" />
+    <bpmn:serviceTask id="Activity_1mhmh48" name="Create Invoice">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="create-invoice" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_02zdlwr</bpmn:incoming>
+      <bpmn:outgoing>Flow_1octspd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_0faqaq6" name="Select Items">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formKey="camunda-forms:bpmn:userTaskForm_3vvo9es" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1xanfdh</bpmn:incoming>
+      <bpmn:outgoing>Flow_1mdxj5l</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_02zdlwr" sourceRef="Activity_1cr7j7z" targetRef="Activity_1mhmh48" />
+    <bpmn:businessRuleTask id="Activity_1cr7j7z" name="Get Item Price">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="price-lookup" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="apple" value="0.76" />
+          <zeebe:header key="banana" value="0.92" />
+          <zeebe:header key="strawberry" value="1.12" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1mdxj5l</bpmn:incoming>
+      <bpmn:outgoing>Flow_02zdlwr</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="Gateway_0l8u3gv" name="payment successfull?">
+      <bpmn:incoming>Flow_0l9ybvs</bpmn:incoming>
+      <bpmn:outgoing>Flow_18v3ost</bpmn:outgoing>
+      <bpmn:outgoing>Flow_063qcft</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_18v3ost" name="yes" sourceRef="Gateway_0l8u3gv" targetRef="Activity_1nozqw7">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= paymentSuccessfull</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_063qcft" name="no" sourceRef="Gateway_0l8u3gv" targetRef="Activity_007639e">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= paymentSuccessfull = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_0yn4g1l">
+      <bpmn:incoming>Flow_0o3i6p5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0o3i6p5" sourceRef="Activity_007639e" targetRef="Event_0yn4g1l" />
+    <bpmn:userTask id="Activity_007639e" name="Contact Customer">
+      <bpmn:incoming>Flow_063qcft</bpmn:incoming>
+      <bpmn:outgoing>Flow_0o3i6p5</bpmn:outgoing>
+    </bpmn:userTask>
+  </bpmn:process>
+  <bpmn:message id="Message_2sdslqn" name="payment_confirm_msg">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=orderId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="order-process">
+      <bpmndi:BPMNEdge id="Flow_1octspd_di" bpmnElement="Flow_1octspd">
+        <di:waypoint x="670" y="117" />
+        <di:waypoint x="730" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mdxj5l_di" bpmnElement="Flow_1mdxj5l">
+        <di:waypoint x="350" y="117" />
+        <di:waypoint x="410" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vl3sba_di" bpmnElement="Flow_0vl3sba">
+        <di:waypoint x="1210" y="117" />
+        <di:waypoint x="1302" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0l9ybvs_di" bpmnElement="Flow_0l9ybvs">
+        <di:waypoint x="928" y="117" />
+        <di:waypoint x="975" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tvdp7y_di" bpmnElement="Flow_0tvdp7y">
+        <di:waypoint x="830" y="117" />
+        <di:waypoint x="892" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xanfdh_di" bpmnElement="Flow_1xanfdh">
+        <di:waypoint x="208" y="117" />
+        <di:waypoint x="250" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02zdlwr_di" bpmnElement="Flow_02zdlwr">
+        <di:waypoint x="510" y="117" />
+        <di:waypoint x="570" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18v3ost_di" bpmnElement="Flow_18v3ost">
+        <di:waypoint x="1025" y="117" />
+        <di:waypoint x="1110" y="117" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1031" y="99" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_063qcft_di" bpmnElement="Flow_063qcft">
+        <di:waypoint x="1000" y="142" />
+        <di:waypoint x="1000" y="230" />
+        <di:waypoint x="1110" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1009" y="183" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o3i6p5_di" bpmnElement="Flow_0o3i6p5">
+        <di:waypoint x="1210" y="230" />
+        <di:waypoint x="1302" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_145ddnc_di" bpmnElement="Activity_0faqaq6">
+        <dc:Bounds x="250" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0j06z1g_di" bpmnElement="Activity_03utgry">
+        <dc:Bounds x="730" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0izff73_di" bpmnElement="Event_0o86qb0">
+        <dc:Bounds x="892" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="886" y="142" width="49" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_19kwxi4_di" bpmnElement="Activity_1mhmh48">
+        <dc:Bounds x="570" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1qplf35_di" bpmnElement="Activity_1cr7j7z">
+        <dc:Bounds x="410" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_18tihzv_di" bpmnElement="Activity_1nozqw7">
+        <dc:Bounds x="1110" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0l8u3gv_di" bpmnElement="Gateway_0l8u3gv" isMarkerVisible="true">
+        <dc:Bounds x="975" y="92" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="970" y="56" width="60" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="172" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="160" y="142" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0yn4g1l_di" bpmnElement="Event_0yn4g1l">
+        <dc:Bounds x="1302" y="212" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_05yczop_di" bpmnElement="Event_05yczop">
+        <dc:Bounds x="1302" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1289" y="142" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11eir21_di" bpmnElement="Activity_007639e">
+        <dc:Bounds x="1110" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

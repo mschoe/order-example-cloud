@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "components": [
+    {
+      "values": [
+        {
+          "label": "Apple",
+          "value": "apple"
+        },
+        {
+          "label": "Banana",
+          "value": "banana"
+        },
+        {
+          "label": "Strawberry",
+          "value": "strawberry"
+        }
+      ],
+      "label": "Select Fruit",
+      "type": "select",
+      "id": "Field_0x6d9x5",
+      "key": "item",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Quantity",
+      "type": "number",
+      "id": "Field_01t8tit",
+      "key": "quantity",
+      "validate": {
+        "required": true,
+        "min": 1,
+        "max": 1500
+      }
+    }
+  ],
+  "type": "default",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "1.2",
+  "id": "select-items"
+}
