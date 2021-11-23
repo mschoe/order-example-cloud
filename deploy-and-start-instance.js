@@ -22,8 +22,7 @@ void (async () => {
   var dt = new Date();
   var orderId = 'order-#' + dt.valueOf();
 
-  var order = {'orderId' : orderId,
-               'amount' : 123}
+  var order = {'orderId' : orderId}
 
 	const result = await zbc.createProcessInstance('order-process', order,)
 

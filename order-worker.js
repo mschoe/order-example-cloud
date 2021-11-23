@@ -14,6 +14,9 @@ void (async () => {
     }
 	})
 
+  // Price Lookup --> this worker requests the price for  
+  // the selected item. The price info will be passed as 
+  // custom header defined in the bpmn.
   zbc.createWorker({
     taskType: 'price-lookup',
     taskHandler: (job, _, worker) => {
@@ -25,6 +28,8 @@ void (async () => {
     }
   });
 
+  // Create Invoice --> this worker calculates the total
+  // amount of the order. 
   zbc.createWorker({
     taskType: 'create-invoice',
     taskHandler: (job, _, worker) => {
@@ -41,6 +46,8 @@ void (async () => {
     }
   });
 
+  // Request Payment --> this worker sends a message to the payment 
+  // process. orderId and amount will be passed as variables.
   zbc.createWorker({
     taskType: 'request-payment',
     taskHandler: (job, _, worker) => {
@@ -58,10 +65,11 @@ void (async () => {
     }
   });
 
+  // Ship Order -> this worker prints out all relevant order information
   zbc.createWorker({
     taskType: 'ship-order',
     taskHandler: (job, _, worker) => {
-      worker.log(`order shipped for ${job.variables.orderId} \n ${job.variables.quantity} ${job.variables.item}s for ${job.variables.amount}€`);      
+      worker.log(`order shipped for ${job.variables.orderId} \n${job.variables.quantity} ${job.variables.item}s for ${job.variables.amount}€`);
 
       job.complete();
     }
