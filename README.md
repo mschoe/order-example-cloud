@@ -1,4 +1,4 @@
-# Order Processing in the CAmunda Cloud 
+# Order Processing in the Camunda Cloud 
 This sample application demonstrates a simple order fullfillment system running in the Camunda Cloud.
 
 ## Install Dependencies
