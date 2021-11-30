@@ -43,15 +43,14 @@ void (async () => {
       const transactionLimit = job.customHeaders['transactionLimit'];
       const { outstandingBalance } = job.variables;
       var { paymentSuccessfull } = job.variables;
-      var transactionId = 'trns-$$';
-      var success = false;
-      worker.log(transactionLimit)
+      var transactionId = 'trns-$$';          
+
       if(transactionLimit <= outstandingBalance) {
         transactionId += Math.floor(Math.random() * 999)
         paymentSuccessfull = true;
       } else {
         transactionId += 'failed-transaction',
-        paymentSuccessfull = fail;
+        paymentSuccessfull = false;
       }      
                   
       job.complete({'transactionId' : transactionId, 'paymentSuccessfull' : paymentSuccessfull});
@@ -65,6 +64,7 @@ void (async () => {
     taskHandler: (job, _, worker) => {
       const { orderId } = job.variables;
       const { transactionId } = job.variables;
+    
       worker.log(job.variables);
       zbc.publishMessage({    
         correlationKey: orderId,    
